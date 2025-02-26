@@ -19,6 +19,14 @@ process.once('loaded', () => {
         optionValidReply: callBack => ipcRenderer.on('option-valid-reply', callBack),
         openDevTools: () => ipcRenderer.invoke('open-dev-tools'),
         fullScreen: value => ipcRenderer.invoke('full-screen', value),
-        reloadPage: () => ipcRenderer.invoke('reload-page')
+        reloadPage: () => ipcRenderer.invoke('reload-page'),
+
+        writeFile: (filename, content) => ipcRenderer.invoke('write-file', filename, content),
+        openWindow: (filename) => ipcRenderer.invoke('open-window', filename),
+        getSpeed: () => ipcRenderer.invoke('get-speed'),
+        setSpeed: (newSpeed) => ipcRenderer.invoke('set-speed', newSpeed),
+        onSpeedChanged: (callback) => {
+            ipcRenderer.on('speed-updated', (event, newSpeed) => callback(event, newSpeed));
+        },
     });
 });

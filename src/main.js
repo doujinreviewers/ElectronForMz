@@ -12,6 +12,7 @@
 =============================================================================*/
 
 let mainWindow = null;
+let speed = 1;
 
 (() => {
     'use strict';
@@ -190,4 +191,48 @@ let mainWindow = null;
     ipcMain.handle('reload-page', event => {
         mainWindow.webContents.reloadIgnoringCache();
     });
+
+    ipcMain.handle('write-file', async (event, filename, content) => {
+        const fs = require('fs');
+        const path = require('path');
+        try {
+            fs.writeFileSync(path.join(process.cwd(), filename), content, 'utf-8');
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+
+    ipcMain.handle('open-window', async (event, filename) => {
+        let win = new BrowserWindow({
+            width: 300,
+            height: 300,
+            webPreferences: {
+                preload: join(app.getAppPath(), 'src/preload.js'),
+                nodeIntegration: false,
+                contextIsolation: true
+            }
+        });
+
+        win.loadFile(filename);
+
+        win.on('close', () => {
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                fs.unlinkSync(path.join(process.cwd(), filename));
+            } catch (e) {
+                console.log(e);
+            }
+        });
+    });
+
+    ipcMain.handle('get-speed', () => speed);
+    ipcMain.handle('set-speed', (event, newSpeed) => {
+        speed = newSpeed;
+        BrowserWindow.getAllWindows().forEach(win => {
+            win.webContents.send('speed-updated', newSpeed);
+        });
+    });
+
 })();
