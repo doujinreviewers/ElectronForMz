@@ -205,7 +205,7 @@ let speed = 1;
 
     ipcMain.handle('open-window', async (event, filename) => {
         const path = require('path');
-        const resourcesPath = path.dirname(app.getPath('exe'));
+        const resourcesPath = app.isPackaged ? path.dirname(app.getPath('exe')) : process.cwd();
         const filePath = path.join(resourcesPath, filename);
 
 
@@ -225,7 +225,7 @@ let speed = 1;
             try {
                 const fs = require('fs');
                 const path = require('path');
-                fs.unlinkSync(path.join(process.cwd(), filename));
+                fs.unlinkSync(filePath);
             } catch (e) {
                 console.log(e);
             }
