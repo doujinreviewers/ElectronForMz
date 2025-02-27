@@ -204,17 +204,22 @@ let speed = 1;
     });
 
     ipcMain.handle('open-window', async (event, filename) => {
+        const path = require('path');
+        const resourcesPath = path.dirname(app.getPath('exe'));
+        const filePath = path.join(resourcesPath, filename);
+
+
         let win = new BrowserWindow({
             width: 300,
             height: 300,
             webPreferences: {
                 preload: join(app.getAppPath(), 'src/preload.js'),
                 nodeIntegration: false,
-                contextIsolation: true
+                contextIsolation: true,
             }
         });
 
-        win.loadFile(filename);
+        win.loadFile(filePath);
 
         win.on('close', () => {
             try {
